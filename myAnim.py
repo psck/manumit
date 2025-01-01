@@ -104,30 +104,39 @@ class TextExample(Scene):
        
 
 class AnimatedBar(Scene):    
-    def construct(self):
-        startPercent=0.3
-        targetPercent=0.6
-        totalWidth=4
-        startVaule=100
-        rect1 = Rectangle(width=totalWidth*startPercent, height=1).set_stroke(BLUE, width=5)
-        rect2 = Rectangle(width=totalWidth*(1-startPercent), height=1).set_stroke(GREEN, width=5)
-       # rect1.add_updater(lambda m: m.move_to(rect1.get_center()))
-       # rect2.add_updater(lambda m: m.move_to(rect2.get_center()))
-        
-        rect1.next_to(rect2, RIGHT,buff=0)
-       
-        
+    def create_animated_bar(startPercent, targetPercent, totalWidth):
+        rect1 = Rectangle(width=totalWidth * startPercent, height=1).set_stroke(BLUE, width=5)
+        rect2 = Rectangle(width=totalWidth * (1 - startPercent), height=1).set_stroke(GREEN, width=5)
+        rect1.next_to(rect2, RIGHT, buff=0)
+
         number_rect1 = DecimalNumber(0, font_size=36, color=BLUE, unit="  \% ", num_decimal_places=1)
         def update_number(mob):
-            mob.set_value((rect1.get_width()/(totalWidth))*100)
+            mob.set_value((rect1.get_width() / totalWidth) * 100)
             mob.move_to(rect1.get_center())
         number_rect1.add_updater(update_number)
 
         number_rect2 = DecimalNumber(0, font_size=36, color=BLUE, unit="  \% ", num_decimal_places=1)
         def update_number2(mob):
-            mob.set_value((rect2.get_width()/(totalWidth))*100)
+            mob.set_value((rect2.get_width() / totalWidth) * 100)
             mob.move_to(rect2.get_center())
         number_rect2.add_updater(update_number2)
+
+        return rect1, rect2, number_rect1, number_rect2
+
+    def construct(self):
+        startPercent = 0.3
+        targetPercent = 0.6
+        totalWidth = 4
+
+        rect1, rect2, number_rect1, number_rect2 = create_animated_bar(startPercent, targetPercent, totalWidth)
+
+        self.play(FadeIn(rect1, rect2, number_rect1, number_rect2))
+        self.play(
+            rect2.animate.stretch_to_fit_width((totalWidth * targetPercent), about_edge=LEFT),
+            rect1.animate.stretch_to_fit_width(totalWidth * (1 - targetPercent), about_edge=RIGHT),
+            run_time=3
+        )
+        self.wait(3)
    
         
         self.play(FadeIn(rect1,rect2,number_rect1,number_rect2))
@@ -184,15 +193,43 @@ class PeopleAsGraph(Scene):
             print (x,data[int(x)] ) 
             return data[int(x)]         
         graph = axes.plot(linear, color=YELLOW, use_smoothing=False)
-       
+               
       
         # graph_label = axes.get_graph_label(graph, label="2x + 1")
 
         self.play(FadeIn(axes,axes_labels),run_time=1)# type: ignore
         self.play(Create(graph)) 
         self.wait()
+class GraphWithTracingDot(Scene):
+    def construct(self):
+        # Create a red dot
+        dot = Dot(color=RED).move_to(ORIGIN)
 
-        
+        # Add the dot to the scene
+        self.add(dot)
+
+        # Play the jumping animation in a loop
+        for _ in range(3):  # Dot jumps up and down 3 times
+            self.play(dot.animate.move_to(UP * 2).set_rate_func(rate_functions.ease_in_out_quad), run_time=0.5)  # Jump up
+            self.play(dot.animate.move_to(ORIGIN).set_rate_func(rate_functions.ease_in_out_quad), run_time=0.5)  # Jump down
+
+class DotBezier(Scene):
+    def construct(self):
+        spiral = ParametricFunction(
+            lambda t: np.array([
+                t * np.cos(t),
+                t * np.sin(t),
+                0
+            ]),
+            t_range=np.array([0, 4 * PI, 0.01]),
+            color=BLUE
+        )
+        dot = Dot(spiral.get_start(), color=RED)
+
+        self.play(Create(spiral))
+        self.play(MoveAlongPath(dot, spiral), run_time=8)
+        self.wait()
+    
 class AnimatingMethods(Scene):
     def construct(self):
         grid = Tex(r"\pi").get_grid(10, 10, height=4)
