@@ -100,8 +100,44 @@ class TextExample(Scene):
         self.play(Write(text2),Create(line))
         text4 = Text( "Converted 46 people \nincreasing perm to contractor ratio",
         font_size=30, color=WHITE,t2c={"46": YELLOW, "perm": YELLOW, "contractor": YELLOW})
-       
-       
+class PieChart(Scene):
+    def construct(self):       
+        def draw_pie_chart(percentages, labels, fill_colors):
+            # Ensure the percentages sum to 100
+            assert sum(percentages) == 100, "Percentages must sum to 100"
+            assert len(percentages) == len(fill_colors), "Each percentage must have a corresponding fill color"
+
+            # Create the pie chart
+            start_angle = 0
+            slices = VGroup()
+            label_texts = VGroup()
+            for i, (percentage, label, color) in enumerate(zip(percentages, labels, fill_colors)):
+                angle = percentage / 100 * 360
+                wedge = AnnularSector(
+                    inner_radius=0,
+                    outer_radius=2,
+                    angle=angle * DEGREES,
+                    start_angle=start_angle * DEGREES,
+                    fill_color=color,
+                    fill_opacity=0.8,
+                    stroke_color=WHITE,
+                    stroke_width=2
+                )
+                slices.add(wedge)
+                start_angle += angle
+
+            # Add label and percentage annotation
+                label_text = Text(f"{label}: {percentage}%", font_size=24, color=WHITE)
+                label_text.move_to(wedge.get_center())
+                label_texts.add(label_text)
+            
+            return slices, label_texts
+        
+        
+        slices, labels = draw_pie_chart([30, 20, 25, 25], ["A", "B", "C", "D"], [BLUE, GREEN, RED, YELLOW])
+        self.add(labels)
+        self.play(Create(slices))
+     
 
 class AnimatedBar(Scene):    
     def create_animated_bar(startPercent, targetPercent, totalWidth):
