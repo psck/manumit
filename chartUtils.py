@@ -44,11 +44,12 @@ def draw_pie_chart(percentages, labels, fill_colors):
         slices.add(wedge)
         start_angle += angle
 
-    # Add label and percentage annotation
+        # Add label and percentage annotation
         label_text = Text(f"{label}: {percentage}%", font_size=24, color=WHITE)
-        label_text.move_to(wedge.get_center())
+        label_angle = (start_angle - angle / 2) * DEGREES
+        label_radius = 2.5  # Slightly outside the wedge
+        label_text.move_to([label_radius * np.cos(label_angle), label_radius * np.sin(label_angle), 0])
         label_texts.add(label_text)
-    
     return slices, label_texts
         
 def divide_rectangle(percentages, totalWidth, height=1):
@@ -74,4 +75,6 @@ class Test(Scene):
         self.play(Create(rectangle))
 
 class TestPie(Scene):
-    slices,text=draw_pie_chart([20, 30, 39,10,1], ["A", "B", "C", "D", "E"], [BLUE, GREEN, RED, YELLOW, PURPLE])
+    def construct(self):
+        slices,text=draw_pie_chart([20, 30, 39,10,1], ["A", "B", "C", "D", "E"], [BLUE, GREEN, RED, YELLOW, PURPLE])
+        self.play(Create(slices), Write(text))
