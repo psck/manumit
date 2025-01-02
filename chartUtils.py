@@ -69,7 +69,47 @@ def divide_rectangle(percentages, totalWidth, height=1):
         current_x += width  # Move to the next position
 
     return rectangles
-class Test(Scene):
+def draw_coordinate_system(x_range, y_range, x_step=1, y_step=1):
+    numberplane = NumberPlane(
+        x_range=x_range,
+        y_range=y_range,
+        x_length=abs(x_range[1] - x_range[0]),
+        y_length=abs(y_range[1] - y_range[0]),
+        axis_config={"include_numbers": True},
+        background_line_style={
+            "stroke_color": BLUE_D,
+            "stroke_width": 1,
+            "stroke_opacity": 0.6
+        }
+    )
+    return numberplane
+
+def Dots(number,radius=0.05,color=WHITE,grid_x=25,grid_y=10, buff=0.1):
+    people = VGroup(*[Dot(radius=0.05,color=color) for x in range(250)])
+    people.arrange_in_grid(25,10,buff=0.1)
+    return people
+
+class TestDots(Scene):
+    def construct(self):
+        dots = Dots(250)
+        self.play(Create(dots))
+        first20Dots=VGroup(*dots[:20])
+        endPoint=dots.get_bottom()
+        
+        self.play(first20Dots.animate.set_color(RED), run_time=1)
+        self.play(first20Dots.animate.shift(RIGHT*2))
+        arc_path = ArcBetweenPoints(
+            start=first20Dots.get_center(),
+            end=endPoint+DOWN*((first20Dots.height/2)+0.1),angle=-PI*1)
+        self.add(arc_path)
+        self.play(MoveAlongPath(first20Dots, arc_path), run_time=2)
+
+class TestCoordinateSystem(Scene):
+    def construct(self):
+        coordinate_system = draw_coordinate_system([-10, 10],[ -5, 5])
+        self.play(Create(coordinate_system))
+
+class TestRectangle(Scene):
      def construct(self):
         rectangle=divide_rectangle([20, 30, 39,10,1], 1,1)
         self.play(Create(rectangle))
