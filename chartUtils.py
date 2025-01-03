@@ -89,6 +89,43 @@ def Dots(number,radius=0.05,color=WHITE,grid_x=25,grid_y=10, buff=0.1):
     people.arrange_in_grid(25,10,buff=0.1)
     return people
 
+def create_stacked_barchart(data, labels=None, bar_width=1, bar_height=5, colors=None):
+    bars = VGroup()
+    for i, bar_data in enumerate(data):
+        bar_group = VGroup()
+        current_height = -bar_height / 2  # Start from the bottom of the bar
+        for j, (value, color) in enumerate(bar_data):
+            rect = Rectangle(width=bar_width, height=value * bar_height).set_fill(color, opacity=0.8).set_stroke(WHITE, width=2)
+            rect.move_to([i * (bar_width + 0.5), current_height + (value * bar_height) / 2, 0])
+            bar_group.add(rect)
+            
+            # Add annotation inside the bar
+            value_text = Text(f"{value * 100:.1f}%", font_size=18, color=WHITE)
+            value_text.move_to(rect.get_center())
+            bar_group.add(value_text)
+            
+            current_height += value * bar_height  # Move up for the next rectangle
+        
+        # Add label below the bar
+        if labels:
+            label_text = Text(labels[i], font_size=18, color=WHITE)
+            label_text.next_to(bar_group, DOWN)
+            bar_group.add(label_text)
+        
+        bars.add(bar_group)
+    return bars
+
+class TestStackedBarChart(Scene):
+    def construct(self):
+        data = [
+            [(0.2, BLUE), (0.3, GREEN), (0.5, RED)],
+            [(0.1, YELLOW), (0.4, PURPLE), (0.5, ORANGE)],
+            [(0.3, BLUE), (0.3, GREEN), (0.4, RED)]
+        ]
+        labels = ["Bar 1", "Bar 2", "Bar 3"]
+        stacked_barchart = create_stacked_barchart(data, labels=labels)
+        self.play(Create(stacked_barchart))
+    
 class TestDots(Scene):
     def construct(self):
         dots = Dots(250)
